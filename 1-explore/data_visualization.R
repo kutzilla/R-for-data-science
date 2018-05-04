@@ -51,6 +51,49 @@ ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + facet_grid(
 
 # Point Geom
 ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy))
+
 # Smooth Geom
 ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy))
 
+# Smooth Geom mit einzelnen unterschiedlichen Linien für die Antriebsarten
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, color = drv))
+
+# Mehrere Geoms in einem Plot
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + geom_smooth(mapping = aes(x = displ, y = hwy))
+
+# Mehrere Geoms in einem Plot ohne doppelten Code
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_smooth() + geom_point()
+
+# Mehrere Geoms in einem Plot ohne doppelten Code und einzelnen Schichten-Ästhetiken
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_point(mapping = aes(color = class)) + geom_smooth() 
+
+# Überschreiben des globalen ggplot-Datenargument innerhalb von geom_smooth
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = class)) +
+  geom_smooth(
+    data = filter(mpg, class == "subcompact"),
+    se = FALSE
+  )
+
+# Darstellung von Diamanten nach ihrer Qualität als Balkendiagramm
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut))
+
+
+# Erzeugung des demo Datensets
+demo <- tribble(
+  ~a,       ~b,
+  "bar_1",  20,
+  "bar_2",  30,
+  "bar_3",  40
+  )
+
+# Plot eines Barcharts aus den x, y Werten von demo mithilfe der identity-Funktion
+ggplot(data = demo) +
+  geom_bar(
+    mapping = aes(x = a, y = b), stat = "identity"
+  )
+
+# Darstellung des proportionalen Verhältnisses zwischen der Diamant-Qualität als Balkendiagramm
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
