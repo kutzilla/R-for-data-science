@@ -97,3 +97,27 @@ ggplot(data = demo) +
 
 # Darstellung des proportionalen Verhältnisses zwischen der Diamant-Qualität als Balkendiagramm
 ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+# Balkendiagramm mit Füllung
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = cut))
+
+# Balkendiagramm mit gestapelter Füllung
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity))
+
+# Balkendiagramm mit Alphawert für Transparenz
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) +
+  geom_bar(alpha = 1/5, position = "identity")
+
+# Balkendiagramm mit völliger Transparenz
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) +
+  geom_bar(fill = NA, position = "identity")
+
+# Balkendiagramm mit gleicher Höhe aller Balken durch position "fill"
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+# Balkendiagramm mit einzelnen Balken für die Werte durch position "dodge"
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+# Scatterplot mit Attribut position "jitter" um überlappende Punkte sichtbar zu machen
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+                                   
