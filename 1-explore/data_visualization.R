@@ -120,4 +120,34 @@ ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity), posit
 
 # Scatterplot mit Attribut position "jitter" um überlappende Punkte sichtbar zu machen
 ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
-                                   
+
+# Klassischer Boxplot
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + geom_boxplot()
+
+# Boxplot mit gedrehtem Koordinatensystem
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + geom_boxplot() + coord_flip()
+
+# Speichern der Kartendaten von Neuseeland
+require(maps)
+nz <- map_data("nz")
+
+# Plot von Neuseeland
+ggplot(nz, aes(long, lat, group = group)) + geom_polygon(fill = "white", color = "black")
+
+# Einsatz von quickmap passendes Seitenverhältnis von Karten
+ggplot(nz, aes(long, lat, group = group)) + geom_polygon(fill = "white", color = "black") + coord_quickmap()
+
+# Erzeugung eines Bar-Charts
+bar <- ggplot(data = diamonds) +
+  geom_bar(
+    mapping = aes(x = cut, fill = cut),
+    show.legend = FALSE,
+    width = 1
+  ) +
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+# Bar-Chart mit gedrehtem Koordinatensystem
+bar + coord_flip()
+# Bar-Chart mit Polarkoordinaten
+bar + coord_polar()
