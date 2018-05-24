@@ -43,6 +43,152 @@ NA == NA
 x <- NA
 is.na(x)
 
+# Filter mit NA-Werten
 df <- tibble(x = c(1, NA, 3))
 filter(df, x > 1)
 filter(df, is.na(x) | x > 1)
+
+# Änderung der Reihenfolge des Dataframes mit arrange
+arrange(flights, year, month, day)
+arrange(flights, desc(arr_delay))
+
+# NA Werte werden mit arrange am Ende sortiert
+df <- tibble(x = c(5, 2, NA))
+arrange(df, x)
+arrange(df, desc(x))
+
+# Auswahl von Subsets mit select-Funktion
+select(flights, year, month, day)
+
+# Auswahl aller Spalten zwischen den genannten
+select(flights, year:day)
+
+# Auswahl aller Spalten außer die zwischen den genannten Spalten
+select(flights, -(year:day))
+
+# Umbennenung einer Spalte mit der rename-Funktion
+rename(flights, tail_num = tailnum)
+
+# Select mit dem everything-Helper um Spalten nach vor
+select(flights, time_hour, air_time, everything())
+
+# Hinzufügen von Variablen mit mutate
+flights_sml <- select(flights,
+                      year:day,
+                      ends_with("delay"),
+                      distance,
+                      air_time)
+mutate(flights_sml,
+       gain = arr_delay - dep_delay,
+       speed = distance / air_time * 60)
+
+mutate(flights_sml,
+       gain = arr_delay - dep_delay,
+       hours = air_time / 60,
+       gain_per_hour = gain / hours)
+
+# Erzeugen neuer Variablen und nur Erhaltung dieser mit transmute
+transmute(flights,
+          gain = arr_delay - dep_delay,
+          hours = air_time / 60,
+          gain_per_hour = gain / hours
+          )
+# Modulo-Operatoren zur Erzeugung von Variablen
+transmute(flights,
+          dep_time,
+          hour = dep_time %/% 100,
+          minute = dep_time %% 100)
+
+# Offsets mit lag and lead
+(x <- 1:10)
+lag(x)
+lead(x)
+
+# Kummulative Werte
+cumsum(x)
+cummean(x)
+
+# Ranking der Werte
+y <- c(1, 2, 2, NA, 3, 4)
+min_rank(y)
+min_rank(desc(y))
+row_number(y)
+dense_rank(y)
+percent_rank(y)
+cume_dist(y)
+
+# Gruppierte Zusammenfassungen mit summarize
+summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
+
+# Gruppierung mit group_by und summarize
+by_day <- group_by(flights, year, month, day)
+summarize(by_day, delay = mean(dep_delay, na.rm = TRUE))
+
+# Kombination von mehreren Operationen mit einer Pipe
+delays <- flights %>% group_by(dest) %>% summarize(count = n(),
+                                                   dist = mean(distance, na.rm = TRUE),
+                                                   delay = mean(arr_delay, na.rm = TRUE)
+                                                   ) %>%
+  filter(count > 20, dest != "HNL")
+
+# Filtern von gecancelten Flügen
+not_cancelled <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  summarize(mean = mean(dep_delay))
+
+# Zählen mit der count-Funktion n()
+delays <- not_cancelled %>%
+  group_by(tailnum) %>%
+  summarize(
+    delay = mean(arr_delay)
+  )
+ggplot(data = delays, mapping = aes(x = delay)) + geom_freqpoly(binwidth = 10)
+
+delays <- not_cancelled %>%
+  group_by(tailnum) %>%
+  summarize(
+    delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+ggplot(data = delays, mapping = aes(x = n, y = delay)) +
+  geom_point(alpha = 1/10)
+
+delays %>%
+  filter(n > 25) %>%
+  ggplot(mapping = aes(x = n, y = delay)) +
+  geom_point(alpha = 1/10)
+
+batting <- as_tibble(Lahman::Batting)
+
+batters <- batting %>%
+  group_by(playerID) %>%
+  summarize(
+    ba = sum(H, na.rm = TRUE) / sum(AB, na.rm = TRUE),
+    ab = sum(AB, na.rm = TRUE)
+  )
+
+batters %>%
+  filter(ab > 100) %>%
+  ggplot(mapping = aes(x = ab, y = ba)) +
+    geom_point() +
+    geom_smooth(se = FALSE)
+
+batters %>%
+  arrange(desc(ba))
+
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  summarize(
+    # Durchschnittlicher Verzögerung
+    avg_delay1 = mean(arr_delay),
+    # Durchschnittliche positive Verzögerung
+    avg_delay1 = mean(arr_delay[arr_delay > 0])
+  )
+
+# Standardabweichung sd
+not_cancelled %>%
+  group_by(dest) %>%
+  summarize(distance_sd = sd(distance)) %>%
+  arrange(desc(distance_sd))
