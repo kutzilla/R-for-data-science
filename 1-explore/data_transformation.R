@@ -192,3 +192,75 @@ not_cancelled %>%
   group_by(dest) %>%
   summarize(distance_sd = sd(distance)) %>%
   arrange(desc(distance_sd))
+
+# Ränge in Datasets mit max und min
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  summarize(
+    first = max(dep_time),
+    last = min(dep_time)
+  )
+
+# Positionen in Datasets mit first und last
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  summarize(
+    first_dep = first(dep_time),
+    last_dep = last(dep_time)
+  )
+
+# Filtern mit range
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  mutate(r = min_rank(desc(dep_time))) %>%
+  filter(r %in% range(r))
+
+# Zählen der einzigartigen Werte mit n_distinct
+not_cancelled %>%
+  group_by(dest) %>%
+  summarize(carriers = n_distinct(carrier)) %>%
+  arrange(desc(carriers))
+
+# Zählen mit counts
+not_cancelled %>% 
+  count(dest)
+
+# Nutzen von count um Gesamtmeilen zu bestimmen
+not_cancelled %>% 
+  count(tailnum, wt = distance)
+
+# sum und mean wandeln logische Operationen in Zahlen um (TRUE = 1, FASLE = 0)
+not_cancelled %>%
+  group_by(year, month, day) %>% 
+  summarize(n_early = sum(dep_time < 500))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarize(hour_perc = mean(arr_delay > 60))
+
+# Gruppiern mit mehreren Variablen
+daily <- group_by(flights, year, month, day)
+
+(per_day <- summarize(daily, flights = n()))
+(per_month <- summarize(per_day, flights = sum(flights)))
+(per_year <- summarize(per_month, flights = sum(flights)))
+
+# Trennen von Gruppen mit ungroup
+daily %>% 
+  ungroup() %>% 
+  summarize(flights = n())
+
+# Gruppierte Mutates und Filter
+flights_sml %>% 
+  group_by(year, month, day) %>% 
+  filter(rank(desc(arr_delay)) < 10)
+
+popular_dests <- flights %>% 
+  group_by(dest) %>% 
+  filter(n() > 365)
+popular_dests
+
+popular_dests %>% 
+  filter(arr_delay > 0) %>% 
+  mutate(prop_delay = arr_delay / sum(arr_delay)) %>% 
+  select(year:day, dest, arr_delay, prop_delay)
